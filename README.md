@@ -3,16 +3,28 @@
 A command-line Python application for logging study sessions and reviewing
 study activity.
 
-## Current functionality
+## Commands
 
-- Log a study session with a class name, date, and number of hours.
-- View all saved study sessions.
-- Store sessions locally in `sessions.json`.
+- `log` — record a study session.
+- `list` — view sessions newest-first.
+- `summary` — show total hours by class.
+- `delete NUMBER` — remove a numbered session after confirmation.
+- `export [FILENAME]` — create a CSV without overwriting existing files.
+- `help` — show command help.
+- `quit` — exit.
+
+Sessions are stored locally in `sessions.json`.
 
 ## Run
 
 ```powershell
 py main.py
+```
+
+Run tests with:
+
+```powershell
+py -m pytest -v
 ```
 
 The earlier `study_tracker.py` file is the vibe-coded version retained for
