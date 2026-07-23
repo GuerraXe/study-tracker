@@ -148,7 +148,7 @@ def session_to_dict(session: StudySession) -> SessionRecord:
     return {
         "class_name": session.class_name,
         "date": session.date.isoformat(),
-        "hours": str(session.hours),
+        "hours": float(session.hours),
         "notes": session.notes,
     }
 
