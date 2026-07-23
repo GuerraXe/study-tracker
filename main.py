@@ -58,9 +58,37 @@ def log_study_session() -> None:
     print("Study session saved.")
 
 
+def view_study_sessions() -> None:
+    sessions = load_sessions()
+    if not sessions:
+        print("No study sessions have been logged yet.")
+        return
+
+    print("\nSaved Study Sessions")
+    for number, session in enumerate(sessions, start=1):
+        print(
+            f"{number}. {session['date']} | "
+            f"{session['class_name']} | {session['hours']:.2f} hours"
+        )
+
+
 def main() -> None:
-    print("Study Tracker")
-    log_study_session()
+    while True:
+        print("\nStudy Tracker")
+        print("1. Log a study session")
+        print("2. View study sessions")
+        print("3. Exit")
+        choice = input("Choose an option: ").strip()
+
+        if choice == "1":
+            log_study_session()
+        elif choice == "2":
+            view_study_sessions()
+        elif choice == "3":
+            print("Goodbye!")
+            return
+        else:
+            print("Choose 1, 2, or 3.")
 
 
 if __name__ == "__main__":

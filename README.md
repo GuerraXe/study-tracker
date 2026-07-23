@@ -6,6 +6,7 @@ study activity.
 ## Current functionality
 
 - Log a study session with a class name, date, and number of hours.
+- View all saved study sessions.
 - Store sessions locally in `sessions.json`.
 
 ## Run
