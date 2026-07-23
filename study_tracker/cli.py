@@ -249,5 +249,8 @@ def run(
                 continue
 
             output_fn(f"Unknown command '{command}'. Type 'help' for commands.")
+        except (EOFError, KeyboardInterrupt):
+            output_fn("Goodbye!")
+            return 0
         except StorageError as error:
             output_fn(str(error))
