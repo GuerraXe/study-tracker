@@ -165,8 +165,8 @@ def run(
                 if not numbered:
                     output_fn("No study sessions found.")
                     continue
-                for number, _, session in numbered:
-                    output_fn(_format_session(number, session))
+                for row in numbered:
+                    output_fn(_format_session(row.number, row.session))
                 continue
 
             if command == "summary":
@@ -179,10 +179,12 @@ def run(
                 if not sessions:
                     output_fn("No study sessions found.")
                     continue
-                totals, overall = summarize_sessions(sessions)
-                for class_name, hours in totals:
-                    output_fn(f"{class_name}: {hours:.2f} hours")
-                output_fn(f"Overall: {overall:.2f} hours")
+                summary = summarize_sessions(sessions)
+                for total in summary.class_totals:
+                    output_fn(
+                        f"{total.class_name}: {total.hours:.2f} hours"
+                    )
+                output_fn(f"Overall: {summary.overall_hours:.2f} hours")
                 continue
 
             if command == "delete":
@@ -203,7 +205,9 @@ def run(
                         f"Valid session numbers are 1 through {len(numbered)}."
                     )
                     continue
-                output_fn(_format_session(number, numbered[number - 1][2]))
+                output_fn(
+                    _format_session(number, numbered[number - 1].session)
+                )
                 confirmation = input_fn("Delete this session? [y/N]: ")
                 if confirmation.strip().casefold() not in {"y", "yes"}:
                     output_fn("Deletion canceled.")

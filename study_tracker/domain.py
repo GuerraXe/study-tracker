@@ -1,7 +1,7 @@
 from dataclasses import InitVar, dataclass
 from datetime import date as Date
 from decimal import Decimal, InvalidOperation
-from typing import Sequence
+from typing import Sequence, TypedDict
 
 
 class ValidationError(ValueError):
@@ -13,6 +13,13 @@ class ValidationError(ValueError):
 
 class InvalidSessionNumber(ValueError):
     pass
+
+
+class SessionRecord(TypedDict):
+    class_name: str
+    date: str
+    hours: float
+    notes: str
 
 
 def _decimal_places(value: Decimal) -> int:
@@ -137,7 +144,7 @@ def session_from_dict(
         ) from error
 
 
-def session_to_dict(session: StudySession) -> dict[str, object]:
+def session_to_dict(session: StudySession) -> SessionRecord:
     return {
         "class_name": session.class_name,
         "date": session.date.isoformat(),
@@ -146,21 +153,37 @@ def session_to_dict(session: StudySession) -> dict[str, object]:
     }
 
 
-NumberedSession = tuple[int, int, StudySession]
+@dataclass(frozen=True)
+class NumberedSession:
+    number: int
+    original_index: int
+    session: StudySession
+
+
+@dataclass(frozen=True)
+class ClassTotal:
+    class_name: str
+    hours: Decimal
+
+
+@dataclass(frozen=True)
+class SessionSummary:
+    class_totals: tuple[ClassTotal, ...]
+    overall_hours: Decimal
 
 
 def number_sessions(sessions: Sequence[StudySession]) -> list[NumberedSession]:
     indexed = list(enumerate(sessions))
     indexed.sort(key=lambda item: item[1].date, reverse=True)
     return [
-        (number, original_index, session)
+        NumberedSession(number, original_index, session)
         for number, (original_index, session) in enumerate(indexed, start=1)
     ]
 
 
 def summarize_sessions(
     sessions: Sequence[StudySession],
-) -> tuple[list[tuple[str, Decimal]], Decimal]:
+) -> SessionSummary:
     totals: dict[str, tuple[str, Decimal]] = {}
     overall = Decimal("0")
     for session in sessions:
@@ -170,8 +193,13 @@ def summarize_sessions(
         )
         totals[key] = (display_name, current + session.hours)
         overall += session.hours
-    rows = sorted(totals.values(), key=lambda row: row[0].casefold())
-    return rows, overall
+    rows = tuple(
+        ClassTotal(class_name, hours)
+        for class_name, hours in sorted(
+            totals.values(), key=lambda row: row[0].casefold()
+        )
+    )
+    return SessionSummary(rows, overall)
 
 
 def delete_session_by_number(
@@ -181,7 +209,7 @@ def delete_session_by_number(
     numbered = number_sessions(sessions)
     if number < 1 or number > len(numbered):
         raise InvalidSessionNumber(number)
-    original_index = numbered[number - 1][1]
+    original_index = numbered[number - 1].original_index
     return [
         session
         for index, session in enumerate(sessions)
